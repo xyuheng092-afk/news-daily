@@ -2,11 +2,12 @@ import os
 import logging
 
 # --- SMTP 邮件配置（从环境变量读取）---
-SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.qq.com")
-SMTP_PORT = int(os.environ.get("SMTP_PORT", "465"))
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "")
-SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "")
-RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL", "")
+# 使用 "or" 防止 Secrets 设为空字符串时覆盖默认值
+SMTP_SERVER = os.environ.get("SMTP_SERVER") or "smtp.qq.com"
+SMTP_PORT = int(os.environ.get("SMTP_PORT") or "465")
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL") or ""
+SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD") or ""
+RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL") or ""
 
 # --- RSS 源配置 ---
 RSS_SOURCES = {
