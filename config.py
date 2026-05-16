@@ -24,10 +24,25 @@ RSS_SOURCES = {
         "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
         "https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml",
     ],
-    "CGTN": [
-        "https://www.cgtn.com/subscribe/rss/section/latest.xml",
+    "BBC": [
+        "http://feeds.bbci.co.uk/news/rss.xml",
+        "http://feeds.bbci.co.uk/news/world/rss.xml",
+        "http://feeds.bbci.co.uk/news/business/rss.xml",
+        "http://feeds.bbci.co.uk/news/politics/rss.xml",
     ],
 }
+
+# --- 网页爬取源（无 RSS 的网站）---
+WEB_SOURCES = {
+    "CCTV": {
+        "url": "https://news.cctv.com/",
+        "item_selector": "div.list_con a, div.list a, div.image_list a, div.text_content a",
+        "max_items": 30,
+    },
+}
+
+# --- 中文源（无需翻译）---
+CHINESE_SOURCES = {"CCTV"}
 
 # --- 筛选关键词 ---
 KEYWORDS = {

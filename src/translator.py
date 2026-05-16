@@ -16,6 +16,12 @@ def translate_articles(articles: list[dict]) -> list[dict]:
         raise
 
     for article in articles:
+        # 中文源（如 CCTV）直接使用原标题，不翻译
+        if article.get("source") in config.CHINESE_SOURCES:
+            article["title_cn"] = article["title"]
+            article["summary_cn"] = article.get("summary", "")
+            continue
+
         # 翻译标题
         try:
             article["title_cn"] = translator.translate(article["title"])

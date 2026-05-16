@@ -29,7 +29,7 @@ def _run():
 
     # 1. 抓取
     logger.info("[1/6] 正在抓取新闻 RSS...")
-    articles = fetch_all_sources(config.RSS_SOURCES)
+    articles = fetch_all_sources()
     logger.info(f"  -> 共抓取 {len(articles)} 篇文章")
 
     if not articles:
