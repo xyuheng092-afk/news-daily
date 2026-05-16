@@ -23,10 +23,9 @@ def load_sent_hashes() -> set:
         logger.warning("sent_urls.json is corrupted, resetting")
         return set()
 
-    cutoff = (datetime.now() - timedelta(days=config.RETENTION_DAYS)).strftime(
-        "%Y-%m-%d"
-    )
-    return {h for h, d in data.items() if d >= cutoff}
+    today = datetime.now().strftime("%Y-%m-%d")
+    # 只去重当天的 URL，隔天自动失效，保证每天两次推送内容不同、每天都有新内容
+    return {h for h, d in data.items() if d == today}
 
 
 def save_sent_hashes(hashes: dict):
