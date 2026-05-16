@@ -6,6 +6,12 @@ on:
     - cron: '0 13 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   fetch-and-send:
     runs-on: ubuntu-latest
