@@ -9,7 +9,11 @@ logger = logging.getLogger("translator")
 
 
 def translate_articles(articles: list[dict]) -> list[dict]:
-    translator = GoogleTranslator(source="en", target="zh-CN")
+    try:
+        translator = GoogleTranslator(source="en", target="zh-CN")
+    except Exception as e:
+        logger.error(f"翻译器初始化失败: {e}")
+        raise
 
     for article in articles:
         # 翻译标题

@@ -1,17 +1,30 @@
 import logging
 import sys
+import os
+import traceback
 
-import config
-from src.fetcher import fetch_all_sources
-from src.filter import classify_and_score, select_top
-from src.dedup import filter_duplicates, save_sent_hashes
-from src.translator import translate_articles
-from src.mailer import send_email
+# 确保项目根目录在 sys.path 中
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import config  # noqa: E402
+from src.fetcher import fetch_all_sources  # noqa: E402
+from src.filter import classify_and_score, select_top  # noqa: E402
+from src.dedup import filter_duplicates, save_sent_hashes  # noqa: E402
+from src.translator import translate_articles  # noqa: E402
+from src.mailer import send_email  # noqa: E402
 
 logger = logging.getLogger("main")
 
 
 def main():
+    try:
+        _run()
+    except Exception:
+        logger.error("未捕获的异常:\n" + traceback.format_exc())
+        sys.exit(1)
+
+
+def _run():
     logger.info("=== 每日新闻推送开始 ===")
 
     # 1. 抓取
@@ -38,7 +51,7 @@ def main():
 
     if not unique:
         logger.warning("所有文章均为已发送过的重复内容，今日无新文章")
-        sys.exit(0)
+        return
 
     # 4. 排序选取
     logger.info("[4/6] 正在排序选取 TOP {} ...".format(config.MAX_ARTICLES))
