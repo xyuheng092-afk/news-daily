@@ -2,8 +2,8 @@ name: Daily News Push
 
 on:
   schedule:
-    # UTC 13:00 = 北京时间 21:00
-    - cron: '0 13 * * *'
+    # UTC 0:00 = 北京时间 8:00, UTC 13:00 = 北京时间 21:00
+    - cron: '0 0,13 * * *'
   workflow_dispatch:
 
 permissions:
