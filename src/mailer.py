@@ -48,7 +48,7 @@ def _build_html(articles: list[dict]) -> str:
         if is_hot and cluster_size >= 3:
             hot_badge = (
                 f'<span style="display:inline-block;background:#ff6b35;color:#fff;'
-                f'font-size:10px;padding:1px 6px;border-radius:3px;margin-left:4px;">'
+                f'font-size:11px;padding:1px 6px;border-radius:3px;margin-left:4px;">'
                 f'🔥 {cluster_size}家媒体报道</span>'
             )
 
@@ -57,13 +57,13 @@ def _build_html(articles: list[dict]) -> str:
         if has_full:
             full_section = f"""
             <details style="margin-top:10px;">
-                <summary style="cursor:pointer;font-size:12px;color:#1a73e8;
+                <summary style="cursor:pointer;font-size:13px;color:#1a73e8;
                                 display:inline-block;padding:4px 12px;
                                 border:1px solid #1a73e8;border-radius:14px;
                                 user-select:none;">
                     阅读中文全文
                 </summary>
-                <div style="font-size:14px;color:#333;line-height:1.9;margin-top:12px;
+                <div style="font-size:15px;color:#333;line-height:1.9;margin-top:12px;
                             padding:14px 16px;background:#fafafa;border-radius:6px;
                             border-left:3px solid {color};">
                     {full_text}
@@ -75,20 +75,20 @@ def _build_html(articles: list[dict]) -> str:
             <td style="padding:16px 20px; border-bottom:1px solid #eee;">
                 <div style="margin-bottom:4px;">
                     <span style="display:inline-block;background:{color};color:#fff;
-                        font-size:10px;padding:2px 8px;border-radius:3px;margin-right:6px;">
+                        font-size:11px;padding:2px 8px;border-radius:3px;margin-right:6px;">
                         {label}
                     </span>
-                    <span style="font-size:12px;color:#999;">{source}</span>
+                    <span style="font-size:13px;color:#999;">{source}</span>
                     {hot_badge}
                 </div>
-                <div style="font-size:15px;font-weight:bold;color:#222;line-height:1.4;
+                <div style="font-size:16px;font-weight:bold;color:#222;line-height:1.4;
                             margin-bottom:4px;">
                     {i}. {title}
                 </div>
-                <div style="font-size:12px;color:#888;line-height:1.5;margin-bottom:6px;">
+                <div style="font-size:13px;color:#888;line-height:1.5;margin-bottom:6px;">
                     {short_summary[:120]}{'...' if len(short_summary) > 120 else ''}
                 </div>
-                <div style="font-size:11px;">
+                <div style="font-size:12px;">
                     <a href="{a['link']}" target="_blank"
                        style="color:#999;text-decoration:none;">查看英文原文 &rarr;</a>
                 </div>
@@ -112,10 +112,10 @@ def _build_html(articles: list[dict]) -> str:
     <tr>
         <td style="background:linear-gradient(135deg,#1a73e8,#1557b0);
                    padding:24px 20px;text-align:center;">
-            <div style="font-size:20px;font-weight:bold;color:#fff;">
+            <div style="font-size:22px;font-weight:bold;color:#fff;">
                 每日全球新闻精选
             </div>
-            <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">
+            <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-top:4px;">
                 {date_str} · 精选{len(articles)}条要闻 · 经济/政治/科技/突发
             </div>
         </td>
@@ -128,14 +128,14 @@ def _build_html(articles: list[dict]) -> str:
     <tr>
         <td style="padding:18px;text-align:center;
                    background:#fafafa;border-top:1px solid #eee;">
-            <div style="font-size:11px;color:#aaa;">
+            <div style="font-size:12px;color:#aaa;">
                 CNN · FOX · NYT · BBC · Reuters · CNBC · AP · The Guardian
                 · HackerNews · TechCrunch · TheVerge · 36氪 · 虎嗅 · 澎湃 · CGTN
             </div>
-            <div style="font-size:11px;color:#aaa;margin-top:2px;">
+            <div style="font-size:12px;color:#aaa;margin-top:2px;">
                 抓取时间：{now_bj.strftime('%Y-%m-%d %H:%M')} (北京时间)
             </div>
-            <div style="font-size:10px;color:#ccc;margin-top:6px;">
+            <div style="font-size:11px;color:#ccc;margin-top:6px;">
                 News Daily Bot · Powered by DeepSeek AI
             </div>
         </td>
