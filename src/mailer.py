@@ -56,13 +56,13 @@ def _build_html(articles: list[dict]) -> str:
         if has_full:
             full_section = f"""
             <details style="margin-top:12px;">
-                <summary style="cursor:pointer;font-size:14px;color:#1a73e8;
+                <summary style="cursor:pointer;font-size:15px;color:#1a73e8;
                                 display:inline-block;padding:5px 14px;
                                 border:1px solid #1a73e8;border-radius:14px;
                                 user-select:none;">
                     阅读中文全文
                 </summary>
-                <div style="font-size:16px;color:#333;line-height:1.9;margin-top:14px;
+                <div style="font-size:17px;color:#333;line-height:1.9;margin-top:14px;
                             padding:14px 16px;background:#fafafa;border-radius:6px;
                             border-left:3px solid {color};">
                     {full_text}
@@ -80,11 +80,11 @@ def _build_html(articles: list[dict]) -> str:
                     <span style="font-size:14px;color:#999;">{source}</span>
                     {hot_badge}
                 </div>
-                <div style="font-size:18px;font-weight:bold;color:#222;line-height:1.4;
+                <div style="font-size:20px;font-weight:bold;color:#222;line-height:1.4;
                             margin-bottom:6px;">
                     {i}. {title}
                 </div>
-                <div style="font-size:15px;color:#555;line-height:1.6;margin-bottom:8px;">
+                <div style="font-size:16px;color:#555;line-height:1.6;margin-bottom:8px;">
                     {short_summary[:120]}{'...' if len(short_summary) > 120 else ''}
                 </div>
                 <div style="font-size:13px;">
@@ -111,10 +111,10 @@ def _build_html(articles: list[dict]) -> str:
     <tr>
         <td style="background:linear-gradient(135deg,#1a73e8,#1557b0);
                    padding:28px 20px;text-align:center;">
-            <div style="font-size:24px;font-weight:bold;color:#fff;">
+            <div style="font-size:26px;font-weight:bold;color:#fff;">
                 每日全球新闻精选
             </div>
-            <div style="font-size:14px;color:rgba(255,255,255,0.8);margin-top:6px;">
+            <div style="font-size:15px;color:rgba(255,255,255,0.8);margin-top:6px;">
                 {date_str} · 精选{len(articles)}条要闻 · 经济/政治/科技/突发
             </div>
         </td>
