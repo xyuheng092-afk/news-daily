@@ -48,22 +48,21 @@ def _build_html(articles: list[dict]) -> str:
         if is_hot and cluster_size >= 3:
             hot_badge = (
                 f'<span style="display:inline-block;background:#ff6b35;color:#fff;'
-                f'font-size:11px;padding:1px 6px;border-radius:3px;margin-left:4px;">'
+                f'font-size:12px;padding:1px 6px;border-radius:3px;margin-left:6px;">'
                 f'🔥 {cluster_size}家媒体报道</span>'
             )
 
-        # 有全文翻译时用 details/summary 实现展开/收起
         full_section = ""
         if has_full:
             full_section = f"""
-            <details style="margin-top:10px;">
-                <summary style="cursor:pointer;font-size:13px;color:#1a73e8;
-                                display:inline-block;padding:4px 12px;
+            <details style="margin-top:12px;">
+                <summary style="cursor:pointer;font-size:14px;color:#1a73e8;
+                                display:inline-block;padding:5px 14px;
                                 border:1px solid #1a73e8;border-radius:14px;
                                 user-select:none;">
                     阅读中文全文
                 </summary>
-                <div style="font-size:15px;color:#333;line-height:1.9;margin-top:12px;
+                <div style="font-size:16px;color:#333;line-height:1.9;margin-top:14px;
                             padding:14px 16px;background:#fafafa;border-radius:6px;
                             border-left:3px solid {color};">
                     {full_text}
@@ -72,23 +71,23 @@ def _build_html(articles: list[dict]) -> str:
 
         items_html += f"""
         <tr>
-            <td style="padding:16px 20px; border-bottom:1px solid #eee;">
-                <div style="margin-bottom:4px;">
+            <td style="padding:18px 20px; border-bottom:1px solid #eee;">
+                <div style="margin-bottom:6px;">
                     <span style="display:inline-block;background:{color};color:#fff;
-                        font-size:11px;padding:2px 8px;border-radius:3px;margin-right:6px;">
+                        font-size:12px;padding:2px 8px;border-radius:3px;margin-right:8px;">
                         {label}
                     </span>
-                    <span style="font-size:13px;color:#999;">{source}</span>
+                    <span style="font-size:14px;color:#999;">{source}</span>
                     {hot_badge}
                 </div>
-                <div style="font-size:16px;font-weight:bold;color:#222;line-height:1.4;
-                            margin-bottom:4px;">
+                <div style="font-size:18px;font-weight:bold;color:#222;line-height:1.4;
+                            margin-bottom:6px;">
                     {i}. {title}
                 </div>
-                <div style="font-size:13px;color:#888;line-height:1.5;margin-bottom:6px;">
+                <div style="font-size:15px;color:#555;line-height:1.6;margin-bottom:8px;">
                     {short_summary[:120]}{'...' if len(short_summary) > 120 else ''}
                 </div>
-                <div style="font-size:12px;">
+                <div style="font-size:13px;">
                     <a href="{a['link']}" target="_blank"
                        style="color:#999;text-decoration:none;">查看英文原文 &rarr;</a>
                 </div>
@@ -111,11 +110,11 @@ def _build_html(articles: list[dict]) -> str:
     <!-- Header -->
     <tr>
         <td style="background:linear-gradient(135deg,#1a73e8,#1557b0);
-                   padding:24px 20px;text-align:center;">
-            <div style="font-size:22px;font-weight:bold;color:#fff;">
+                   padding:28px 20px;text-align:center;">
+            <div style="font-size:24px;font-weight:bold;color:#fff;">
                 每日全球新闻精选
             </div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-top:4px;">
+            <div style="font-size:14px;color:rgba(255,255,255,0.8);margin-top:6px;">
                 {date_str} · 精选{len(articles)}条要闻 · 经济/政治/科技/突发
             </div>
         </td>
