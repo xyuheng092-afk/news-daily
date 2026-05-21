@@ -51,6 +51,19 @@ def _build_html(articles: list[dict]) -> str:
                 f'🔥 {cluster_size}家媒体报道</span>'
             )
 
+        # 翻译链接（中文源不需要）
+        translate_link = ""
+        if source not in config.CHINESE_SOURCES:
+            translate_link = f"""
+                <div style="margin-top:8px;">
+                    <a href="https://www.bing.com/translator?from=en&to=zh-Hans&url={a['link']}"
+                       target="_blank"
+                       style="font-size:11px;color:#1a73e8;text-decoration:none;
+                              border:1px solid #1a73e8;padding:2px 10px;border-radius:12px;">
+                        中文全文翻译
+                    </a>
+                </div>"""
+
         items_html += f"""
         <tr>
             <td style="padding:16px 20px; border-bottom:1px solid #eee;">
@@ -72,6 +85,7 @@ def _build_html(articles: list[dict]) -> str:
                 <div style="font-size:13px;color:#666;line-height:1.5;">
                     {summary}
                 </div>
+                {translate_link}
             </td>
         </tr>"""
 
