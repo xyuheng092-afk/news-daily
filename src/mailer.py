@@ -31,8 +31,7 @@ def _build_html(articles: list[dict]) -> str:
     now_bj = datetime.now(BJT)
     date_str = now_bj.strftime("%Y年%m月%d日")
 
-    # --- 摘要列表 ---
-    summary_items = ""
+    items_html = ""
     for i, a in enumerate(articles, 1):
         cat = a.get("category", "general")
         color = TAG_COLORS.get(cat, TAG_COLORS["general"])
@@ -42,7 +41,8 @@ def _build_html(articles: list[dict]) -> str:
         source = a.get("source", "")
         is_hot = a.get("is_hot", False)
         cluster_size = a.get("cluster_size", 1)
-        has_full = bool(a.get("full_content_cn", "") and len(a.get("full_content_cn", "")) > 30)
+        full_text = a.get("full_content_cn", "")
+        has_full = bool(full_text and len(full_text) > 30)
 
         hot_badge = ""
         if is_hot and cluster_size >= 3:
@@ -52,16 +52,27 @@ def _build_html(articles: list[dict]) -> str:
                 f'🔥 {cluster_size}家媒体报道</span>'
             )
 
-        read_more = ""
+        # 有全文翻译时用 details/summary 实现展开/收起
+        full_section = ""
         if has_full:
-            read_more = (
-                f'<a href="#full{i}" style="font-size:11px;color:#1a73e8;'
-                f'text-decoration:none;">阅读中文全文 &darr;</a>'
-            )
+            full_section = f"""
+            <details style="margin-top:10px;">
+                <summary style="cursor:pointer;font-size:12px;color:#1a73e8;
+                                display:inline-block;padding:4px 12px;
+                                border:1px solid #1a73e8;border-radius:14px;
+                                user-select:none;">
+                    阅读中文全文
+                </summary>
+                <div style="font-size:14px;color:#333;line-height:1.9;margin-top:12px;
+                            padding:14px 16px;background:#fafafa;border-radius:6px;
+                            border-left:3px solid {color};">
+                    {full_text}
+                </div>
+            </details>"""
 
-        summary_items += f"""
+        items_html += f"""
         <tr>
-            <td style="padding:14px 20px; border-bottom:1px solid #eee;">
+            <td style="padding:16px 20px; border-bottom:1px solid #eee;">
                 <div style="margin-bottom:4px;">
                     <span style="display:inline-block;background:{color};color:#fff;
                         font-size:10px;padding:2px 8px;border-radius:3px;margin-right:6px;">
@@ -70,70 +81,18 @@ def _build_html(articles: list[dict]) -> str:
                     <span style="font-size:12px;color:#999;">{source}</span>
                     {hot_badge}
                 </div>
-                <div style="margin-bottom:4px;font-size:15px;font-weight:bold;color:#222;
-                            line-height:1.4;">
+                <div style="font-size:15px;font-weight:bold;color:#222;line-height:1.4;
+                            margin-bottom:4px;">
                     {i}. {title}
                 </div>
-                <div style="font-size:12px;color:#888;line-height:1.5;margin-bottom:4px;">
+                <div style="font-size:12px;color:#888;line-height:1.5;margin-bottom:6px;">
                     {short_summary[:120]}{'...' if len(short_summary) > 120 else ''}
                 </div>
-                <div>
+                <div style="font-size:11px;">
                     <a href="{a['link']}" target="_blank"
-                       style="font-size:11px;color:#999;text-decoration:none;">原文 &rarr;</a>
-                    {f'<span style="margin:0 6px;color:#ddd;">|</span> {read_more}' if read_more else ''}
+                       style="color:#999;text-decoration:none;">查看英文原文 &rarr;</a>
                 </div>
-            </td>
-        </tr>"""
-
-    # --- 全文部分 ---
-    full_items = ""
-    has_any_full = any(
-        a.get("full_content_cn", "") and len(a.get("full_content_cn", "")) > 30
-        for a in articles
-    )
-
-    if has_any_full:
-        full_items += """
-        <tr>
-            <td style="padding:16px 20px; background:#f0f4ff; border-bottom:2px solid #1a73e8;">
-                <div style="font-size:16px;font-weight:bold;color:#1a73e8;">
-                    今日新闻中文全文
-                </div>
-                <div style="font-size:12px;color:#888;margin-top:4px;">
-                    以下为 DeepSeek AI 翻译的完整中文新闻，可在邮件内直接阅读
-                </div>
-            </td>
-        </tr>"""
-
-        for i, a in enumerate(articles, 1):
-            full_text = a.get("full_content_cn", "")
-            if not full_text or len(full_text) <= 30:
-                continue
-            cat = a.get("category", "general")
-            color = TAG_COLORS.get(cat, TAG_COLORS["general"])
-            title = a.get("title_cn", a["title"])
-
-            full_items += f"""
-        <tr>
-            <td style="padding:16px 20px; border-bottom:1px solid #eee;" id="full{i}">
-                <div style="margin-bottom:8px;">
-                    <a href="#top" style="font-size:11px;color:#1a73e8;text-decoration:none;">
-                        &uarr; 返回列表
-                    </a>
-                </div>
-                <div style="font-size:16px;font-weight:bold;color:#222;margin-bottom:10px;
-                            line-height:1.4;border-left:3px solid {color};padding-left:10px;">
-                    {i}. {title}
-                </div>
-                <div style="font-size:14px;color:#333;line-height:1.9;">
-                    {full_text}
-                </div>
-                <div style="margin-top:12px;padding-top:8px;border-top:1px dashed #ddd;">
-                    <a href="{a['link']}" target="_blank"
-                       style="font-size:11px;color:#999;text-decoration:none;">
-                        查看英文原文 &rarr;
-                    </a>
-                </div>
+                {full_section}
             </td>
         </tr>"""
 
@@ -145,7 +104,7 @@ def _build_html(articles: list[dict]) -> str:
 <body style="margin:0;padding:0;background:#f4f4f4;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;">
 <tr><td align="center" style="padding:20px 10px;">
-<table width="640" cellpadding="0" cellspacing="0" id="top"
+<table width="640" cellpadding="0" cellspacing="0"
        style="background:#fff;border-radius:8px;overflow:hidden;
               box-shadow:0 2px 8px rgba(0,0,0,0.08);">
 
@@ -162,15 +121,12 @@ def _build_html(articles: list[dict]) -> str:
         </td>
     </tr>
 
-    <!-- 摘要列表 -->
-    {summary_items}
-
-    <!-- 全文区域 -->
-    {full_items}
+    <!-- Articles -->
+    {items_html}
 
     <!-- Footer -->
     <tr>
-        <td style="padding:20px;text-align:center;
+        <td style="padding:18px;text-align:center;
                    background:#fafafa;border-top:1px solid #eee;">
             <div style="font-size:11px;color:#aaa;">
                 CNN · FOX · NYT · BBC · Reuters · CNBC · AP · The Guardian
