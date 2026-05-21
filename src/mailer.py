@@ -31,20 +31,19 @@ def _build_html(articles: list[dict]) -> str:
     now_bj = datetime.now(BJT)
     date_str = now_bj.strftime("%Y年%m月%d日")
 
-    items_html = ""
+    # --- 摘要列表 ---
+    summary_items = ""
     for i, a in enumerate(articles, 1):
         cat = a.get("category", "general")
         color = TAG_COLORS.get(cat, TAG_COLORS["general"])
         label = CATEGORY_LABELS.get(cat, "综合")
         title = a.get("title_cn", a["title"])
-        full_text = a.get("full_content_cn", "")
-        fallback_summary = a.get("summary_cn", a.get("summary", ""))
+        short_summary = a.get("summary_cn", a.get("summary", ""))
         source = a.get("source", "")
         is_hot = a.get("is_hot", False)
         cluster_size = a.get("cluster_size", 1)
-        has_full = bool(full_text and len(full_text) > 30)
+        has_full = bool(a.get("full_content_cn", "") and len(a.get("full_content_cn", "")) > 30)
 
-        # 热点标记
         hot_badge = ""
         if is_hot and cluster_size >= 3:
             hot_badge = (
@@ -53,49 +52,88 @@ def _build_html(articles: list[dict]) -> str:
                 f'🔥 {cluster_size}家媒体报道</span>'
             )
 
-        # 正文内容：优先展示全文翻译，否则用 LLM 摘要
+        read_more = ""
         if has_full:
-            body_html = f"""
-                <div style="font-size:14px;color:#333;line-height:1.8;margin-top:8px;
-                            padding:12px 16px;background:#f9f9f9;border-radius:6px;
-                            border-left:3px solid {color};">
-                    {full_text}
-                </div>"""
-        else:
-            body_html = f"""
-                <div style="font-size:13px;color:#666;line-height:1.5;margin-top:4px;">
-                    {fallback_summary}
-                </div>"""
+            read_more = (
+                f'<a href="#full{i}" style="font-size:11px;color:#1a73e8;'
+                f'text-decoration:none;">阅读中文全文 &darr;</a>'
+            )
 
-        # 原文链接
-        source_link = f"""
-                <div style="margin-top:10px;">
-                    <a href="{a['link']}" target="_blank"
-                       style="font-size:11px;color:#1a73e8;text-decoration:none;">
-                        阅读英文原文 &rarr;
-                    </a>
-                </div>"""
-
-        items_html += f"""
+        summary_items += f"""
         <tr>
-            <td style="padding:16px 20px; border-bottom:1px solid #eee;">
-                <div style="margin-bottom:6px;">
+            <td style="padding:14px 20px; border-bottom:1px solid #eee;">
+                <div style="margin-bottom:4px;">
                     <span style="display:inline-block;background:{color};color:#fff;
-                        font-size:11px;padding:2px 8px;border-radius:3px;margin-right:6px;">
+                        font-size:10px;padding:2px 8px;border-radius:3px;margin-right:6px;">
                         {label}
                     </span>
                     <span style="font-size:12px;color:#999;">{source}</span>
                     {hot_badge}
                 </div>
-                <div style="margin-bottom:4px;">
+                <div style="margin-bottom:4px;font-size:15px;font-weight:bold;color:#222;
+                            line-height:1.4;">
+                    {i}. {title}
+                </div>
+                <div style="font-size:12px;color:#888;line-height:1.5;margin-bottom:4px;">
+                    {short_summary[:120]}{'...' if len(short_summary) > 120 else ''}
+                </div>
+                <div>
                     <a href="{a['link']}" target="_blank"
-                       style="font-size:16px;font-weight:bold;color:#222;text-decoration:none;
-                              line-height:1.4;">
-                        {i}. {title}
+                       style="font-size:11px;color:#999;text-decoration:none;">原文 &rarr;</a>
+                    {f'<span style="margin:0 6px;color:#ddd;">|</span> {read_more}' if read_more else ''}
+                </div>
+            </td>
+        </tr>"""
+
+    # --- 全文部分 ---
+    full_items = ""
+    has_any_full = any(
+        a.get("full_content_cn", "") and len(a.get("full_content_cn", "")) > 30
+        for a in articles
+    )
+
+    if has_any_full:
+        full_items += """
+        <tr>
+            <td style="padding:16px 20px; background:#f0f4ff; border-bottom:2px solid #1a73e8;">
+                <div style="font-size:16px;font-weight:bold;color:#1a73e8;">
+                    今日新闻中文全文
+                </div>
+                <div style="font-size:12px;color:#888;margin-top:4px;">
+                    以下为 DeepSeek AI 翻译的完整中文新闻，可在邮件内直接阅读
+                </div>
+            </td>
+        </tr>"""
+
+        for i, a in enumerate(articles, 1):
+            full_text = a.get("full_content_cn", "")
+            if not full_text or len(full_text) <= 30:
+                continue
+            cat = a.get("category", "general")
+            color = TAG_COLORS.get(cat, TAG_COLORS["general"])
+            title = a.get("title_cn", a["title"])
+
+            full_items += f"""
+        <tr>
+            <td style="padding:16px 20px; border-bottom:1px solid #eee;" id="full{i}">
+                <div style="margin-bottom:8px;">
+                    <a href="#top" style="font-size:11px;color:#1a73e8;text-decoration:none;">
+                        &uarr; 返回列表
                     </a>
                 </div>
-                {body_html}
-                {source_link}
+                <div style="font-size:16px;font-weight:bold;color:#222;margin-bottom:10px;
+                            line-height:1.4;border-left:3px solid {color};padding-left:10px;">
+                    {i}. {title}
+                </div>
+                <div style="font-size:14px;color:#333;line-height:1.9;">
+                    {full_text}
+                </div>
+                <div style="margin-top:12px;padding-top:8px;border-top:1px dashed #ddd;">
+                    <a href="{a['link']}" target="_blank"
+                       style="font-size:11px;color:#999;text-decoration:none;">
+                        查看英文原文 &rarr;
+                    </a>
+                </div>
             </td>
         </tr>"""
 
@@ -107,37 +145,42 @@ def _build_html(articles: list[dict]) -> str:
 <body style="margin:0;padding:0;background:#f4f4f4;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;">
 <tr><td align="center" style="padding:20px 10px;">
-<table width="640" cellpadding="0" cellspacing="0"
+<table width="640" cellpadding="0" cellspacing="0" id="top"
        style="background:#fff;border-radius:8px;overflow:hidden;
               box-shadow:0 2px 8px rgba(0,0,0,0.08);">
 
     <!-- Header -->
     <tr>
         <td style="background:linear-gradient(135deg,#1a73e8,#1557b0);
-                   padding:30px 20px;text-align:center;">
-            <div style="font-size:22px;font-weight:bold;color:#fff;">
+                   padding:24px 20px;text-align:center;">
+            <div style="font-size:20px;font-weight:bold;color:#fff;">
                 每日全球新闻精选
             </div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-top:6px;">
-                {date_str} · 精选{len(articles)}条要闻 · 覆盖经济/政治/科技/突发
+            <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">
+                {date_str} · 精选{len(articles)}条要闻 · 经济/政治/科技/突发
             </div>
         </td>
     </tr>
 
-    <!-- Articles -->
-    {items_html}
+    <!-- 摘要列表 -->
+    {summary_items}
+
+    <!-- 全文区域 -->
+    {full_items}
 
     <!-- Footer -->
     <tr>
         <td style="padding:20px;text-align:center;
                    background:#fafafa;border-top:1px solid #eee;">
             <div style="font-size:11px;color:#aaa;">
-                新闻来源：CNN · FOX · NYT · BBC · Reuters · CNBC · AP · The Guardian
-                · HackerNews · TechCrunch · TheVerge · 36氪 · 虎嗅 · 澎湃 · CGTN<br>
+                CNN · FOX · NYT · BBC · Reuters · CNBC · AP · The Guardian
+                · HackerNews · TechCrunch · TheVerge · 36氪 · 虎嗅 · 澎湃 · CGTN
+            </div>
+            <div style="font-size:11px;color:#aaa;margin-top:2px;">
                 抓取时间：{now_bj.strftime('%Y-%m-%d %H:%M')} (北京时间)
             </div>
-            <div style="font-size:10px;color:#ccc;margin-top:4px;">
-                本邮件由 News Daily Bot 自动发送 · Powered by DeepSeek AI
+            <div style="font-size:10px;color:#ccc;margin-top:6px;">
+                News Daily Bot · Powered by DeepSeek AI
             </div>
         </td>
     </tr>
