@@ -12,6 +12,7 @@ from src.dedup import filter_duplicates, save_sent_hashes  # noqa: E402
 from src.translator import translate_titles  # noqa: E402
 from src.cluster import cluster_articles  # noqa: E402
 from src.mailer import send_email  # noqa: E402
+from src.extractor import extract_content, translate_full_content  # noqa: E402
 
 logger = logging.getLogger("main")
 
@@ -29,15 +30,15 @@ def _run_llm_pipeline(articles: list[dict]):
     from src.llm_filter import llm_classify, select_top_llm
 
     # 3. LLM 分类打分 + 摘要
-    logger.info("[3/7] 正在 LLM 智能分类打分...")
+    logger.info("[3/8] 正在 LLM 智能分类打分...")
     articles = llm_classify(articles)
 
     # 4. 跨源聚类
-    logger.info("[4/7] 正在跨源故事聚类...")
+    logger.info("[4/8] 正在跨源故事聚类...")
     articles = cluster_articles(articles)
 
     # 5. 排序选取
-    logger.info("[5/7] 正在排序选取 TOP {} ...".format(config.MAX_ARTICLES))
+    logger.info("[5/8] 正在排序选取 TOP {} ...".format(config.MAX_ARTICLES))
     top = select_top_llm(articles, config.MAX_ARTICLES)
     logger.info(f"  -> 选取 {len(top)} 篇精选文章")
 
@@ -47,7 +48,7 @@ def _run_llm_pipeline(articles: list[dict]):
 def _run_keyword_pipeline(articles: list[dict]):
     """Fallback 模式：关键词分类 + 打分"""
     # 3. 关键词分类打分
-    logger.info("[3/7] 正在关键词分类打分...")
+    logger.info("[3/8] 正在关键词分类打分...")
     articles = [classify_and_score(a) for a in articles]
     cats = {}
     for a in articles:
@@ -55,11 +56,11 @@ def _run_keyword_pipeline(articles: list[dict]):
     logger.info(f"  -> 分类统计: {cats}")
 
     # 4. 跨源聚类（无 LLM 分数，用关键词分数替代）
-    logger.info("[4/7] 正在跨源故事聚类...")
+    logger.info("[4/8] 正在跨源故事聚类...")
     articles = cluster_articles(articles)
 
     # 5. 排序选取
-    logger.info("[5/7] 正在排序选取 TOP {} ...".format(config.MAX_ARTICLES))
+    logger.info("[5/8] 正在排序选取 TOP {} ...".format(config.MAX_ARTICLES))
     top = select_top(articles, config.MAX_ARTICLES)
     logger.info(f"  -> 选取 {len(top)} 篇精选文章")
 
@@ -77,7 +78,7 @@ def _run():
         logger.warning("LLM 模式未启用: DEEPSEEK_API_KEY 未设置，将使用关键词模式")
 
     # 1. 抓取
-    logger.info("[1/7] 正在抓取新闻 RSS...")
+    logger.info("[1/8] 正在抓取新闻 RSS...")
     articles = fetch_all_sources()
     logger.info(f"  -> 共抓取 {len(articles)} 篇文章")
 
@@ -86,7 +87,7 @@ def _run():
         sys.exit(1)
 
     # 2. 去重
-    logger.info("[2/7] 正在去重检查...")
+    logger.info("[2/8] 正在去重检查...")
     unique, new_hashes = filter_duplicates(articles)
     logger.info(f"  -> 去重后剩余 {len(unique)} 篇")
 
@@ -104,13 +105,34 @@ def _run():
     else:
         top = _run_keyword_pipeline(unique)
 
-    # 6. 翻译标题（中文源跳过，英文源翻译标题）
-    logger.info("[6/7] 正在翻译标题...")
+    # 6. 抓取全文 + DeepSeek 翻译
+    if use_llm:
+        logger.info("[6/8] 正在抓取新闻全文并翻译...")
+        success_count = 0
+        for a in top:
+            if a.get("source") in config.CHINESE_SOURCES:
+                continue
+            try:
+                content = extract_content(a["link"])
+                if content and len(content) > 200:
+                    a["full_content_cn"] = translate_full_content(a["title"], content)
+                    success_count += 1
+                    logger.info(f"  全文翻译成功: {a['title'][:50]}...")
+                else:
+                    logger.info(f"  内容不足，跳过: {a['title'][:50]}...")
+            except Exception as e:
+                logger.warning(f"  全文翻译失败 [{a['source']}]: {e}")
+        logger.info(f"  -> 全文翻译完成 ({success_count}/{len(top)} 篇)")
+    else:
+        logger.info("[6/8] 全文翻译跳过 (LLM 未启用)")
+
+    # 7. 翻译标题（中文源跳过，英文源翻译标题）
+    logger.info("[7/8] 正在翻译标题...")
     top = translate_titles(top)
     logger.info("  -> 标题翻译完成")
 
-    # 7. 发送邮件
-    logger.info("[7/7] 正在发送邮件...")
+    # 8. 发送邮件
+    logger.info("[8/8] 正在发送邮件...")
     send_email(top)
     logger.info("  -> 邮件发送成功")
 

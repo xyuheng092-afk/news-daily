@@ -37,10 +37,12 @@ def _build_html(articles: list[dict]) -> str:
         color = TAG_COLORS.get(cat, TAG_COLORS["general"])
         label = CATEGORY_LABELS.get(cat, "综合")
         title = a.get("title_cn", a["title"])
-        summary = a.get("summary_cn", a.get("summary", ""))
+        full_text = a.get("full_content_cn", "")
+        fallback_summary = a.get("summary_cn", a.get("summary", ""))
         source = a.get("source", "")
         is_hot = a.get("is_hot", False)
         cluster_size = a.get("cluster_size", 1)
+        has_full = bool(full_text and len(full_text) > 30)
 
         # 热点标记
         hot_badge = ""
@@ -51,16 +53,26 @@ def _build_html(articles: list[dict]) -> str:
                 f'🔥 {cluster_size}家媒体报道</span>'
             )
 
-        # 翻译链接（中文源不需要）
-        translate_link = ""
-        if source not in config.CHINESE_SOURCES:
-            translate_link = f"""
-                <div style="margin-top:8px;">
-                    <a href="https://www.bing.com/translator?from=en&to=zh-Hans&url={a['link']}"
-                       target="_blank"
-                       style="font-size:11px;color:#1a73e8;text-decoration:none;
-                              border:1px solid #1a73e8;padding:2px 10px;border-radius:12px;">
-                        中文全文翻译
+        # 正文内容：优先展示全文翻译，否则用 LLM 摘要
+        if has_full:
+            body_html = f"""
+                <div style="font-size:14px;color:#333;line-height:1.8;margin-top:8px;
+                            padding:12px 16px;background:#f9f9f9;border-radius:6px;
+                            border-left:3px solid {color};">
+                    {full_text}
+                </div>"""
+        else:
+            body_html = f"""
+                <div style="font-size:13px;color:#666;line-height:1.5;margin-top:4px;">
+                    {fallback_summary}
+                </div>"""
+
+        # 原文链接
+        source_link = f"""
+                <div style="margin-top:10px;">
+                    <a href="{a['link']}" target="_blank"
+                       style="font-size:11px;color:#1a73e8;text-decoration:none;">
+                        阅读英文原文 &rarr;
                     </a>
                 </div>"""
 
@@ -82,10 +94,8 @@ def _build_html(articles: list[dict]) -> str:
                         {i}. {title}
                     </a>
                 </div>
-                <div style="font-size:13px;color:#666;line-height:1.5;">
-                    {summary}
-                </div>
-                {translate_link}
+                {body_html}
+                {source_link}
             </td>
         </tr>"""
 
