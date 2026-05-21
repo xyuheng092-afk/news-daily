@@ -4,12 +4,13 @@ import config
 
 logger = logging.getLogger("filter")
 
-CATEGORY_PRIORITY = {"breaking": 0, "politics": 1, "economy": 2, "general": 3}
+CATEGORY_PRIORITY = {"breaking": 0, "politics": 1, "economy": 2, "tech": 3, "general": 4}
 
 CATEGORY_LABELS = {
     "breaking": "突发",
     "politics": "政治",
     "economy": "经济",
+    "tech": "科技",
     "general": "综合",
 }
 
