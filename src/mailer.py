@@ -154,11 +154,23 @@ def send_email(articles: list[dict]) -> bool:
     if not config.RECIPIENT_EMAIL:
         raise RuntimeError("邮件配置缺失: 请设置 RECIPIENT_EMAIL 环境变量")
 
-    date_str = datetime.now(BJT).strftime("%Y年%m月%d日")
+    now = datetime.now(BJT)
+    date_str = now.strftime("%Y年%m月%d日")
+    time_str = now.strftime("%H:%M")
+    hour = now.hour
+    if hour < 6:
+        period = "深夜"
+    elif hour < 12:
+        period = "早间"
+    elif hour < 18:
+        period = "午间"
+    else:
+        period = "晚间"
+
     html = _build_html(articles)
 
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"每日全球新闻精选 - {date_str}"
+    msg["Subject"] = f"全球新闻精选 · {period}版 · {date_str} {time_str}"
     msg["From"] = config.SENDER_EMAIL
     msg["To"] = config.RECIPIENT_EMAIL
     msg.attach(MIMEText(html, "html", "utf-8"))
