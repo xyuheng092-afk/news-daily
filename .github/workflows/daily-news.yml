@@ -2,8 +2,8 @@ name: Daily News Push
 
 on:
   schedule:
-    # 每6小时推送 (UTC 0,6,12,18 = 北京时间 8,14,20,2)
-    - cron: '0 */6 * * *'
+    # 每天3次 (UTC 23:50/5:50/11:50 = 北京时间 7:50/13:50/19:50，缓冲10分钟给流程运行)
+    - cron: '50 23,5,11 * * *'
   workflow_dispatch:
 
 permissions:
